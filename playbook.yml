@@ -60,6 +60,13 @@
       executable: /bin/bash
     when: nix_version_output.rc == 2
 
+  - name: Clone Home Manager configuration
+    git:
+      repo: git@github.com:eotsn/home-manager.git
+      dest: ~/.config/home-manager
+      accept_hostkey: true
+      version: main
+
   - name: Check for existing Home Manager installation
     command: home-manager --version
     failed_when: false
