@@ -47,7 +47,9 @@
       shell: /bin/zsh
 
   - name: Check for existing Nix installation
-    command: nix --version
+    shell: |
+      . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+      nix --version
     failed_when: false
     changed_when: false
     register: nix_version_output
@@ -58,7 +60,7 @@
       sh <(curl -L https://nixos.org/nix/install) </dev/null --daemon
     args:
       executable: /bin/bash
-    when: nix_version_output.rc == 2
+    when: nix_version_output.rc != 0
 
   - name: Clone Home Manager configuration
     git:
@@ -68,19 +70,22 @@
       version: main
 
   - name: Check for existing Home Manager installation
-    command: home-manager --version
+    shell: |
+      . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+      home-manager --version
     failed_when: false
     changed_when: false
     register: home_manager_version_output
 
   - name: Install Home Manager
     shell: |
+      . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
       nix-channel --add https://github.com/nix-community/home-manager/archive/master.tar.gz home-manager
       nix-channel --update
       nix-shell '<home-manager>' -A install
     args:
       executable: /bin/bash
-    when: home_manager_version_output.rc == 2
+    when: home_manager_version_output.rc != 0
 
   - name: Clone Neovim configuration
     git:
