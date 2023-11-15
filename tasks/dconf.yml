@@ -1,0 +1,31 @@
+---
+- name: Install dconf dependendencies
+  ansible.buildin.pip:
+    name: psutil
+    extra_args: --user
+
+- name: Disable mutter dynamic workspaces
+  community.general.dconf:
+    key: "/org/gnome/mutter/dynamic-workspaces"
+    value: "false"
+    state: present
+
+- name: Set fixed number of workspaces
+  community.general.dconf:
+    key: "/org/gnome/desktop/wm/preferences/num-workspaces"
+    value: "{{ num_workspaces }}"
+    state: present
+
+- name: Set switch to workspace keybindings
+  community.general.dconf:
+    key: "/org/gnome/desktop/wm/keybindings/switch-to-workspace-{{ item }}"
+    value: "['<Super>{{ item }}']"
+    state: present
+  loop: "{{ range(1, num_workspaces + 1)|list }}"
+
+- name: Set move to workspace keybindings
+  community.general.dconf:
+    key: "/org/gnome/desktop/wm/keybindings/move-to-workspace-{{ item }}"
+    value: "['<Super><Shift>{{ item }}']"
+    state: present
+  loop: "{{ range(1, num_workspaces + 1)|list }}"
